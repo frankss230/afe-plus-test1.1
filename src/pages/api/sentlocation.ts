@@ -128,4 +128,8 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
     res.setHeader('Allow', ['PUT', 'POST']);
     return res.status(405).json({ message: `วิธี ${req.method} ไม่อนุญาต` });
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 4c637751b8e1d8705dcb3edb47f6f201b6c5987c

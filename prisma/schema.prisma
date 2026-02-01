@@ -110,15 +110,14 @@ model location {
   users_id          Int
   takecare_id       Int
   location_id       Int            @id @default(autoincrement())
-  locat_timestamp   DateTime       @default(now())
+  locat_timestamp   DateTime       @db.Date
   locat_latitude    String         @default("0") @db.VarChar(255)
   locat_longitude   String         @default("0") @db.VarChar(255)
   locat_status      Int            @default(1)
   locat_distance    Int            @default(0)
   locat_battery     Int            @default(0)
   locat_noti_time   DateTime?
-  locat_noti_status Int?           @default(0)  //แก้ตรงนี้ dalf
-  locat_noti_count  Int?           @default(0)  //แก้ตรงนี้ dalf
+  locat_noti_status Int?
   takecare_id_ref   takecareperson @relation(fields: [takecare_id], references: [takecare_id])
   users_id_ref      users          @relation(fields: [users_id], references: [users_id])
 }
@@ -218,7 +217,6 @@ model fall_records {
   fall_status    Int?           @default(0)
   noti_time      DateTime?      @db.Timestamp(6)
   noti_status    Int?
-  noti_count     Int?           @default(0) // ✅ เพิ่มบรรทัดนี้
   takecareperson takecareperson @relation(fields: [takecare_id], references: [takecare_id], map: "fk_takecare_fall_records")
   users          users          @relation(fields: [users_id], references: [users_id], map: "fk_users_fall_records")
 }

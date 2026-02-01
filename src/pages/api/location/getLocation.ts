@@ -28,6 +28,8 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
             if (!latestLocation) {
                 return res.status(404).json({ message: 'error', data: 'ไม่พบตำแหน่งล่าสุด' });
             }
+            
+            res.setHeader('Cache-Control', 'no-store');
 
             return res.status(200).json({
                 message: 'success',

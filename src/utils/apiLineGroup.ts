@@ -12,29 +12,29 @@ const LINE_HEADER = {
 };
 
 interface ReplyNotification {
-    resUser          : {
+    resUser: {
         users_related_borrow: string;
-        users_fname         : string;
-        users_sname         : string;
-        users_tel1          : string;
-        users_line_id       : string;
+        users_fname: string;
+        users_sname: string;
+        users_tel1: string;
+        users_line_id: string;
     };
     resTakecareperson: {
         takecare_fname: string;
         takecare_sname: string;
-        takecare_tel1 : string;
-        takecare_id   : number;
+        takecare_tel1: string;
+        takecare_id: number;
     };
-    resSafezone      : {};
-    extendedHelpId   : number;
-    locationData : {
-        locat_latitude : number;
+    resSafezone: {};
+    extendedHelpId: number;
+    locationData: {
+        locat_latitude: number;
         locat_longitude: number;
     };
 }
 interface ReplyNoti {
-    replyToken : string;
-    message    : string;
+    replyToken: string;
+    message: string;
     userIdAccept: string;
 }
 export const getUserProfile = async (userId: string) => {
@@ -72,29 +72,29 @@ const layoutBoxBaseline = (label: string, text: string, flex1 = 2, flex2 = 5) =>
     }
 }
 
-const header1 = () =>{
+const header1 = () => {
     const h1 = {
-        type    : "text",
-        text    : " ",
+        type: "text",
+        text: " ",
         contents: [
             {
-                type      : "span",
-                text      : "แจ้งเตือนช่วยเหลือเพิ่มเติม",
-                color     : "#FC0303",
-                size      : "xl",
-                weight    : "bold",
+                type: "span",
+                text: "แจ้งเตือนช่วยเหลือเพิ่มเติม",
+                color: "#FC0303",
+                size: "xl",
+                weight: "bold",
                 decoration: "none"
             },
             {
-                type      : "span",
-                text      : " ",
-                size      : "xxl",
+                type: "span",
+                text: " ",
+                size: "xxl",
                 decoration: "none"
             }
         ]
     }
     const h2 = {
-        type  : "separator",
+        type: "separator",
         margin: "md"
     }
     return [h1, h2]
@@ -217,7 +217,7 @@ export const replyNotification = async ({
                                             uri: `tel:${resUser.users_tel1}`
                                         },
                                     },
-                                    
+
                                 ],
                             },
                         },
@@ -246,59 +246,59 @@ export const replyNoti = async ({
     try {
         const profile = await getUserProfile(userIdAccept);
         const requestData = {
-            to:replyToken,
+            to: replyToken,
             messages: [
                 {
-                    type    : "flex",
-                    altText : "แจ้งเตือน",
+                    type: "flex",
+                    altText: "แจ้งเตือน",
                     contents: {
                         type: "bubble",
                         body: {
-                            type    : "box",
-                            layout  : "vertical",
+                            type: "box",
+                            layout: "vertical",
                             contents: [
                                 header1()[0],
                                 header1()[1],
                                 {
-                                    type  : "text",
-                                    text  : " ",
-                                    wrap : true,
+                                    type: "text",
+                                    text: " ",
+                                    wrap: true,
                                     lineSpacing: "5px",
                                     margin: "md",
-                                    contents:[
+                                    contents: [
                                         {
-                                            type      : "span",
-                                            text      : `คุณ ${profile.displayName}`,
-                                            color     : "#555555",
-                                            size      : "md",
+                                            type: "span",
+                                            text: `คุณ ${profile.displayName}`,
+                                            color: "#555555",
+                                            size: "md",
                                         },
                                         {
-                                            type      : "span",
-                                            text      : " ",
-                                            size      : "xl",
+                                            type: "span",
+                                            text: " ",
+                                            size: "xl",
                                             decoration: "none"
                                         }
                                     ]
                                 },
                                 {
-                                    type  : "text",
-                                    text  : " ",
-                                    wrap : true,
+                                    type: "text",
+                                    text: " ",
+                                    wrap: true,
                                     lineSpacing: "5px",
                                     margin: "md",
-                                    contents:[
+                                    contents: [
                                         {
-                                            type      : "span",
-                                            text      : message,
-                                            color     : "#555555",
-                                            size      : "md",
+                                            type: "span",
+                                            text: message,
+                                            color: "#555555",
+                                            size: "md",
                                             // decoration: "none",
                                             // wrap      : true
                                         },
                                         {
-                                            type      : "span",
-                                            text      : " ",
-                                            size      : "xl",
+                                            type: "span",
+                                            text: " ",
+                                            size: "xl",
                                             decoration: "none"
                                         }
                                     ]
@@ -309,7 +309,7 @@ export const replyNoti = async ({
                 }
             ],
         };
-       await axios.post(LINE_PUSH_MESSAGING_API, requestData, { headers:LINE_HEADER });
+        await axios.post(LINE_PUSH_MESSAGING_API, requestData, { headers: LINE_HEADER });
     } catch (error) {
         if (error instanceof Error) {
             console.log(error.message);

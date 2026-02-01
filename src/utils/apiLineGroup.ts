@@ -205,19 +205,6 @@ export const replyNotification = async ({
                                             data: `type=close&takecareId=${resTakecareperson.takecare_id}&extenId=${extendedHelpId}&userLineId=${resUser.users_line_id}`,
                                         },
                                     },
-                                    {
-                                        type: 'button',
-                                        style: 'primary',
-                                        height: 'sm',
-                                        margin: 'xxl',
-                                        color: '#f10000',
-                                        action: {
-                                            type: 'uri',
-                                            label: 'โทรหาผู้ดูแล',
-                                            uri: `tel:${resUser.users_tel1}`
-                                        },
-                                    },
-                                    
                                 ],
                             },
                         },

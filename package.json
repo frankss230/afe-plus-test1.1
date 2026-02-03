@@ -61,7 +61,6 @@
     "@types/md5": "^2.3.2",
     "@types/node": "^20.4.5",
     "@types/react-datepicker": "^4.11.2",
-    "@types/prop-types": "^15.8.1",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
     "prisma": "^6.1.0",

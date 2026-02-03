@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/router'
 import axios from 'axios'
 
@@ -33,14 +33,7 @@ const SettingHeartRate = () => {
   const [idSetting, setIdSetting] = useState<number | null>(null)
   const [maxBpm, setMaxBpm] = useState<number>(120)
 
-  useEffect(() => {
-    const auToken = router.query.auToken
-    if (auToken) {
-      fetchUserData(auToken as string)
-    }
-  }, [router.query.auToken])
-
-  const fetchUserData = async (auToken: string) => {
+  const fetchUserData = useCallback(async (auToken: string) => {
     try {
       const responseUser = await axios.get(`${process.env.WEB_DOMAIN}/api/user/getUser/${auToken}`)
       if (responseUser.data?.data) {
@@ -64,7 +57,15 @@ const SettingHeartRate = () => {
     } catch (error) {
       showAlert('ระบบไม่สามารถดึงข้อมูลของท่านได้ กรุณาลองใหม่อีกครั้ง')
     }
-  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.query.idsetting])
+
+  useEffect(() => {
+    const auToken = router.query.auToken
+    if (auToken) {
+      fetchUserData(auToken as string)
+    }
+  }, [router.query.auToken, fetchUserData])
 
   const fetchHeartRateSetting = async (settingId: number) => {
     try {

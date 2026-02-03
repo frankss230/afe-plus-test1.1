@@ -46,10 +46,6 @@ const ReturnEquipment = () => {
 
     const borrow_status = React.createRef<HTMLSelectElement>()
 
-    useEffect(() => {
-        getBorrowEquipmentListReturnData('', '', '')
-    },[])   
-
     const getBorrowEquipmentListReturnData = useCallback(async (name: string, name_borrow: string, status: string) => {
         try {
             const response = await getBorrowEquipmentListReturn(name, name_borrow, status)
@@ -60,6 +56,10 @@ const ReturnEquipment = () => {
             console.log('error', error)
         }
     }, [])
+
+    useEffect(() => {
+        getBorrowEquipmentListReturnData('', '', '')
+    },[getBorrowEquipmentListReturnData])
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -89,7 +89,7 @@ const ReturnEquipment = () => {
             console.log("🚀 ~ handleSaveBorrow ~ error", error)
             dispatch(openModalAlert({ show: true, message: 'บันทึกไม่สำเร็จ' }));
         }
-    }, [borrow_status, show, user])
+    }, [borrow_status, show, user, dispatch, getBorrowEquipmentListReturnData])
 
     return (
         <LayoutPage>
@@ -102,12 +102,12 @@ const ReturnEquipment = () => {
                         <Card.Body>
                             <Form onSubmit={(e) => handleSubmit(e)} noValidate validated={validated} className="row p-2">
                                 <Form.Group className="col">
-                                    <Form.Label>ชื่อ-สกุล ของผู้ดูแลผู้สูงอายุ</Form.Label>
-                                    <Form.Control type="text" name="name_user" placeholder="ชื่อ-สกุล ของผู้ดูแลผู้สูงอายุ" />
+                                    <Form.Label>ชื่อ-สกุล ของผู้ดูแลผู้มีภาวะพึ่งพิง</Form.Label>
+                                    <Form.Control type="text" name="name_user" placeholder="ชื่อ-สกุล ของผู้ดูแลผู้มีภาวะพึ่งพิง" />
                                 </Form.Group>
                                 <Form.Group className="col">
-                                    <Form.Label>ชื่อ-สกุล ของผู้สูงอายุ </Form.Label>
-                                    <Form.Control type="text" name="name_borrow" placeholder="ชื่อ-สกุล ของผู้สูงอายุ" />
+                                    <Form.Label>ชื่อ-สกุล ของผู้มีภาวะพึ่งพิง </Form.Label>
+                                    <Form.Control type="text" name="name_borrow" placeholder="ชื่อ-สกุล ของผู้มีภาวะพึ่งพิง" />
                                 </Form.Group>
                                 <Form.Group className="col">
                                     <Form.Label>สถานะ</Form.Label>
@@ -139,8 +139,8 @@ const ReturnEquipment = () => {
                                 <thead>
                                     <tr>
                                         <th className="px-2">ลำดับ</th>
-                                        <th className="px-2">ชื่อ-สกุล ของผู้ดูแลผู้สูงอายุ</th>
-                                        <th className="px-2">ชื่อ-สกุล ของผู้สูงอายุ</th>
+                                        <th className="px-2">ชื่อ-สกุล ของผู้ดูแลผู้มีภาวะพึ่งพิง</th>
+                                        <th className="px-2">ชื่อ-สกุล ของผู้มีภาวะพึ่งพิง</th>
                                         {/* <th className="px-2">วันที่สิ้นสุด</th> */}
                                         <th className="px-2">สถานะ</th>
                                         <th className="px-2">เครื่องมือ</th>
@@ -179,11 +179,11 @@ const ReturnEquipment = () => {
                         <Table striped bordered hover>
                             <tbody>
                                 <tr>
-                                    <td className="px-2">{'ชื่อ-สกุล ของผู้ดูแลผู้สูงอายุ'}</td>
+                                    <td className="px-2">{'ชื่อ-สกุล ของผู้ดูแลผู้มีภาวะพึ่งพิง'}</td>
                                     <td className="px-2">{show.body.users_id_ref.users_fname} {show.body.users_id_ref.users_sname}</td>
                                 </tr>
                                 <tr>
-                                    <td className="px-2">{'ชื่อ-สกุล ของผู้สูงอายุ'}</td>
+                                    <td className="px-2">{'ชื่อ-สกุล ของผู้มีภาวะพึ่งพิง'}</td>
                                     <td className="px-2">{show.body.borrow_name}</td>
                                 </tr>
                                 <tr>

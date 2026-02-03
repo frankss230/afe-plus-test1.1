@@ -9,7 +9,7 @@ if (!SECRET_KEY) {
     throw new Error('SECRET_KEY environment variable is not set');
 }
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
         const { username, password } = req.body;
         
@@ -68,3 +68,5 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         return res.status(405).json({ message: 'Method not allowed' });
     }
 };
+
+export default handler;

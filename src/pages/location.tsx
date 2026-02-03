@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/router'
 import axios from 'axios'
 
@@ -44,18 +44,75 @@ const Location = () => {
     const [destination, setDestination] = useState({ lat: 0, lng: 0 }); // Default destination
 
     useEffect(() => {
+        // ใช้ Optional Chaining (?) แทนการใช้ ! เยอะๆ จะปลอดภัยกว่า
+        if (!dataUser?.takecareData?.userData?.origin?.lat) return;
+
+        const interval = setInterval(async () => {
+            try {
+                // แก้จุดนี้: ห้ามเคาะเว้นวรรคตรงเครื่องหมาย / เด็ดขาด
+                const url = `${process.env.WEB_DOMAIN}/api/location/getLocation?takecare_id=${dataUser.takecareData.takecare_id}&users_id=${dataUser.userData.users_id}`;
+
+                const resLocation = await axios.get(url);
+
+                if (resLocation.data?.data) {
+                    const data = resLocation.data.data;
+                    setDestination({
+                        lat: Number(data.locat_latitude),
+                        lng: Number(data.locat_longitude),
+                    });
+                }
+            } catch (err) {
+                console.log("realtime location error", err);
+            }
+        }, 3000);
+
+        return () => clearInterval(interval);
+    }, [dataUser, origin]); // อย่าลืมเช็คว่า origin มีตัวตนในหน้านี้ไหม
+
+    const alertModal = () => {
+        setAlert({ show: true, message: 'ระบบไม่สามารถดึงข้อมูลของท่านได้ กรุณาลองใหม่อีกครั้ง' })
+        setDataUser({ isLogin: false, userData: null, takecareData: null })
+    }
+
+    const onGetUserData = useCallback(async (auToken: string) => {
+        try {
+            const responseUser = await axios.get(`${process.env.WEB_DOMAIN}/api/user/getUser/${auToken}`);
+            if (responseUser.data?.data) {
+                const encodedUsersId = encrypt(responseUser.data?.data.users_id.toString());
+
+                const responseTakecareperson = await axios.get(`${process.env.WEB_DOMAIN}/api/user/getUserTakecareperson/${encodedUsersId}`);
+                const data = responseTakecareperson.data?.data
+                if (data) {
+                    setDataUser({ isLogin: false, userData: responseUser.data?.data, takecareData: data })
+                    onGetSafezone(router.query.idsafezone as string, data, responseUser.data?.data)
+                } else {
+                    alertModal()
+                }
+            } else {
+                alertModal()
+            }
+        } catch (error) {
+            console.log("🚀 ~ file: registration.tsx:66 ~ onGetUserData ~ error:", error)
+            setDataUser({ isLogin: false, userData: null, takecareData: null })
+            setAlert({ show: true, message: 'ระบบไม่สามารถดึงข้อมูลของท่านได้ กรุณาลองใหม่อีกครั้ง' })
+            setLoading(false)
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [router.query.idsafezone])
+
+    useEffect(() => {
         const auToken = router.query.auToken
         if (auToken && isLoaded) {
             onGetUserData(auToken as string)
         }
-        
 
-    }, [router.query.auToken, isLoaded]);
+
+    }, [router.query.auToken, isLoaded, onGetUserData]);
 
     useEffect(() => {
-        if(isLoaded){
+        if (isLoaded) {
             const directionsService = new window.google.maps.DirectionsService();
-    
+
             directionsService.route(
                 {
                     origin: new window.google.maps.LatLng(origin.lat, origin.lng),
@@ -103,7 +160,7 @@ const Location = () => {
                     lat: Number(data.locat_latitude),
                     lng: Number(data.locat_longitude),
                 });
-            }else{
+            } else {
                 setDestination({
                     lat: Number(safezoneData.safez_latitude),
                     lng: Number(safezoneData.safez_longitude),
@@ -118,37 +175,6 @@ const Location = () => {
         }
     }
 
-    const alertModal = () => {
-        setAlert({ show: true, message: 'ระบบไม่สามารถดึงข้อมูลของท่านได้ กรุณาลองใหม่อีกครั้ง' })
-        setDataUser({ isLogin: false, userData: null, takecareData: null })
-    }
-
-    const onGetUserData = async (auToken: string) => {
-        try {
-            const responseUser = await axios.get(`${process.env.WEB_DOMAIN}/api/user/getUser/${auToken}`);
-            if (responseUser.data?.data) {
-                const encodedUsersId = encrypt(responseUser.data?.data.users_id.toString());
-
-                const responseTakecareperson = await axios.get(`${process.env.WEB_DOMAIN}/api/user/getUserTakecareperson/${encodedUsersId}`);
-                const data = responseTakecareperson.data?.data
-                if (data) {
-                    setDataUser({ isLogin: false, userData: responseUser.data?.data, takecareData: data })
-                    onGetSafezone(router.query.idsafezone as string, data, responseUser.data?.data)
-                } else {
-                    alertModal()
-                }
-            } else {
-                alertModal()
-            }
-        } catch (error) {
-            console.log("🚀 ~ file: registration.tsx:66 ~ onGetUserData ~ error:", error)
-            setDataUser({ isLogin: false, userData: null, takecareData: null })
-            setAlert({ show: true, message: 'ระบบไม่สามารถดึงข้อมูลของท่านได้ กรุณาลองใหม่อีกครั้ง' })
-            setLoading(false)
-        }
-    }
-
-   
     const center = useMemo(() => ({ lat: origin.lat, lng: origin.lng }), [origin]);
 
     const handleMarkerClick = (id: number, lat: number, lng: number, address: string) => {
@@ -163,7 +189,7 @@ const Location = () => {
         fillOpacity: 0.2,
     };
 
-    if((origin.lat === 0 && origin.lng === 0) || (destination.lat === 0 && destination.lng === 0)){
+    if ((origin.lat === 0 && origin.lng === 0) || (destination.lat === 0 && destination.lng === 0)) {
         return (
             <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
                 <Spinner animation="border" variant="primary" />
@@ -201,7 +227,7 @@ const Location = () => {
                                     scaledSize: new window.google.maps.Size(35, 35)
                                 }}
                                 onClick={() => {
-                                    handleMarkerClick(1, destination.lat, destination.lng, 'ผู้สูงอายุ');
+                                    handleMarkerClick(1, destination.lat, destination.lng, 'ผู้มีภาวะพึ่งพิง');
                                 }}
                             >
                                 {infoWindowData.show && (
@@ -238,8 +264,8 @@ const Location = () => {
 
                         </GoogleMap>
                         <div className={styles.buttonLayout}>
-                    {dataUser.takecareData?.takecare_tel1 && (
-                        <a className={`btn btn-primary ${styles.button}`}href={`tel:${dataUser.takecareData?.takecare_tel1}`}> โทรหาผู้สูงอายุ <i className="fas fa-phone"></i> </a>)}
+                            {dataUser.takecareData?.takecare_tel1 && (
+                                <a className={`btn btn-primary ${styles.button}`} href={`tel:${dataUser.takecareData?.takecare_tel1}`}> โทรหาผู้มีภาวะพึ่งพิง <i className="fas fa-phone"></i> </a>)}
                         </div>
 
                     </>

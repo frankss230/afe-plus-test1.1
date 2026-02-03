@@ -35,7 +35,7 @@ const App = ({ Component, pageProps }: AppProps) => {
       setLoading(false);
     });
 
-  }, []);
+  }, [router.events]);
 
   return (
     <Provider store={store}>

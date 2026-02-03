@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/router'
 import axios from 'axios'
 
@@ -59,23 +59,10 @@ const Setting = () => {
     const [dataUser, setDataUser] = useState<DataUserState>({ isLogin: false, userData: null, takecareData: null })
     const [idSafezoneStage, setIdSafezoneStage] = useState(0)
 
-    useEffect(() => {
-        const auToken = router.query.auToken
-        // const idSafezone = router.query.idsafezone
-     
-        if (auToken) {
-            onGetUserData(auToken as string)
-        }
-
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition((position) => {
-                setLocation({
-                    latitude: position.coords.latitude,
-                    longitude: position.coords.longitude,
-                });
-            });
-        }
-    }, [router.query.auToken]);
+    const alertModal = () => {
+        setAlert({ show: true, message: 'ระบบไม่สามารถดึงข้อมูลของท่านได้ กรุณาลองใหม่อีกครั้ง' })
+        setDataUser({ isLogin: false, userData: null, takecareData: null })
+    }
 
     const onGetSafezone = async (idSafezone: string, takecareData : any, userData: any) => {
         try {
@@ -97,12 +84,12 @@ const Setting = () => {
         }
     }
 
-    const onGetUserData = async (auToken: string) => {
+    const onGetUserData = useCallback(async (auToken: string) => {
         try {
             const responseUser = await axios.get(`${process.env.WEB_DOMAIN}/api/user/getUser/${auToken}`);
             if(responseUser.data?.data){
                 const encodedUsersId = encrypt(responseUser.data?.data.users_id.toString());
-                
+
                 const responseTakecareperson = await axios.get(`${process.env.WEB_DOMAIN}/api/user/getUserTakecareperson/${encodedUsersId}`);
                 const data = responseTakecareperson.data?.data
                 if(data){
@@ -122,12 +109,25 @@ const Setting = () => {
             setDataUser({ isLogin: false, userData: null, takecareData: null })
             setAlert({ show: true, message: 'ระบบไม่สามารถดึงข้อมูลของท่านได้ กรุณาลองใหม่อีกครั้ง' })
         }
-    }
+    }, [router.query.idsafezone])
 
-    const alertModal = () => {
-        setAlert({ show: true, message: 'ระบบไม่สามารถดึงข้อมูลของท่านได้ กรุณาลองใหม่อีกครั้ง' })
-        setDataUser({ isLogin: false, userData: null, takecareData: null })
-    }
+    useEffect(() => {
+        const auToken = router.query.auToken
+        // const idSafezone = router.query.idsafezone
+
+        if (auToken) {
+            onGetUserData(auToken as string)
+        }
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                setLocation({
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                });
+            });
+        }
+    }, [router.query.auToken, onGetUserData]);
 
     const { isLoaded } = useLoadScript({
         googleMapsApiKey: process.env.GoogleMapsApiKey as string

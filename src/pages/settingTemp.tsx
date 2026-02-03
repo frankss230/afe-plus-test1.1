@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/router'
 import axios from 'axios'
 
@@ -39,16 +39,8 @@ const TemperatureSetting = () => {
   // ค่าอุณหภูมิสูงสุดที่ตั้งไว้
   const [maxTemperature, setMaxTemperature] = useState<number>(37)
 
-  // เมื่อ auToken ใน query เปลี่ยน จะดึงข้อมูลผู้ใช้
-  useEffect(() => {
-    const auToken = router.query.auToken
-    if (auToken) {
-      fetchUserData(auToken as string)
-    }
-  }, [router.query.auToken])
-
   // ฟังก์ชันดึงข้อมูลผู้ใช้และผู้ดูแล
-  const fetchUserData = async (auToken: string) => {
+  const fetchUserData = useCallback(async (auToken: string) => {
     try {
       const responseUser = await axios.get(`${process.env.WEB_DOMAIN}/api/user/getUser/${auToken}`)
       if (responseUser.data?.data) {
@@ -72,7 +64,16 @@ const TemperatureSetting = () => {
     } catch (error) {
       showAlert('ระบบไม่สามารถดึงข้อมูลของท่านได้ กรุณาลองใหม่อีกครั้ง')
     }
-  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.query.idsetting])
+
+  // เมื่อ auToken ใน query เปลี่ยน จะดึงข้อมูลผู้ใช้
+  useEffect(() => {
+    const auToken = router.query.auToken
+    if (auToken) {
+      fetchUserData(auToken as string)
+    }
+  }, [router.query.auToken, fetchUserData])
 
   // ฟังก์ชันดึงข้อมูลการตั้งค่าอุณหภูมิ
   const fetchTemperatureSetting = async (settingId: number) => {

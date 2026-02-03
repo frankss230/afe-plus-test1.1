@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/router';
 
@@ -30,7 +30,7 @@ const ReturnOf = () => {
   const [alert, setAlert] = useState({ show: false, message: '' });
 
   // ดึงข้อมูลผู้ใช้ด้วย auToken
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     try {
       const auToken = router.query.auToken;
       if (auToken) {
@@ -45,7 +45,7 @@ const ReturnOf = () => {
       console.error("Error fetching user data:", error);
       setAlert({ show: true, message: 'ไม่สามารถโหลดข้อมูลผู้ใช้ได้' });
     }
-  };
+  }, [router.query.auToken]);
 
   // ดึงข้อมูลรายการอุปกรณ์ที่ถูกยืมของผู้ใช้ที่ล็อกอินอยู่
   const fetchBorrowedItems = async (userId: number) => {
@@ -77,7 +77,7 @@ const ReturnOf = () => {
     if (router.query.auToken) {
       fetchUserData();
     }
-  }, [router.query.auToken]);
+  }, [router.query.auToken, fetchUserData]);
 
   // เมื่อผู้ใช้ถูกโหลดแล้ว ให้ดึงข้อมูลรายการยืมโดยใช้ userId
   useEffect(() => {

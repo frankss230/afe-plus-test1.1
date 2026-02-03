@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 
 import { handleAxiosError } from '@/lib/service/helpFunction';
@@ -26,19 +26,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const router = useRouter();
     const dispatch = useDispatch<AppDispatch>();
 
-    useEffect(() => {
-        const storedToken = localStorage.getItem('token');
-        if (storedToken) {
-            setToken(storedToken);
-            getUser(storedToken)
-            
-        }else{
-            setLoading(false);
-        }
+    const logout = useCallback(() => {
+        setToken(null);
+        localStorage.removeItem('token');
+        dispatch(removeDataUser());
+        Cookies.remove('currentUser');
+        router.push('/admin/login');
+    }, [dispatch, router]);
 
-    }, []);
-
-    const getUser = async (storedToken: string) => {
+    const getUser = useCallback(async (storedToken: string) => {
         try {
             const response = await getSessionService(storedToken);
             setLoading(false);
@@ -59,7 +55,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             const errorMessage = handleAxiosError(error);
             logout();
         }
-    }
+    }, [dispatch, logout]);
+
+    useEffect(() => {
+        const storedToken = localStorage.getItem('token');
+        if (storedToken) {
+            setToken(storedToken);
+            getUser(storedToken);
+        } else {
+            setLoading(false);
+        }
+    }, [getUser]);
+
     const login = async (username: string, password: string) => {
         try {
             const response = await loginService(username, password);
@@ -68,7 +75,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     setToken(response?.accessToken);
                     localStorage.setItem('token', response?.accessToken);
                 }
-               
+
                 dispatch(setDataUser({...response?.user, accessToken: response?.accessToken}));
                 Cookies.set('currentUser', JSON.stringify(response?.user))
             }
@@ -77,14 +84,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             const errorMessage = handleAxiosError(error);
             throw errorMessage;
         }
-    };
-
-    const logout = () => {
-        setToken(null);
-        localStorage.removeItem('token');
-        dispatch(removeDataUser());
-        Cookies.remove('currentUser');
-        router.push('/admin/login');
     };
 // console.log('isAuthenticated', isAuthenticated)
     return (

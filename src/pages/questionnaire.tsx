@@ -11,15 +11,6 @@ const Questionnaire = () => {
 
     const [isLoaded, setIsLoaded] = useState(true)
 
-    useEffect(() => {
-        const { id } = router.query
-        if(id){
-            const idString = Array.isArray(id) ? id[0] : id;
-            fetchData(idString)
-        }
-        console.log("🚀 ~ useEffect ~ id:", id)
-    }, [router])
-
     const fetchData = useCallback(async (id: string) => {
         try {
             const response = await axios.get(`${process.env.WEB_DOMAIN}/api/borrowequipment/questionnaire?id=${id}`)
@@ -30,6 +21,15 @@ const Questionnaire = () => {
             console.log("🚀 ~ fetchData ~ error", error)
         }
     }, [])
+
+    useEffect(() => {
+        const { id } = router.query
+        if(id){
+            const idString = Array.isArray(id) ? id[0] : id;
+            fetchData(idString)
+        }
+        console.log("🚀 ~ useEffect ~ id:", id)
+    }, [router, fetchData])
 
   return (
     <Container>

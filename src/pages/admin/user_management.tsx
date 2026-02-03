@@ -21,19 +21,19 @@ const UserManagement = () => {
     const setStatus = useRef<HTMLSelectElement>(null)
     const dispatch = useDispatch()
 
-    useEffect(() => {
-        getUsersList('')
-    }, [])
-
     const getUsersList = useCallback(async (name: string) => {
         try {
           const res = await getUsers(name)
           setUsersList(res.data)
         } catch (error) {
             console.log("🚀 ~ getUsersList ~ error:", error)
-            
+
         }
     }, [])
+
+    useEffect(() => {
+        getUsersList('')
+    }, [getUsersList])
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -63,7 +63,7 @@ const UserManagement = () => {
         } catch (error) {
             dispatch(openModalAlert({ show: true, message: handleAxiosError(error) }));
         }
-    }, [setStatus, show])
+    }, [setStatus, show, dispatch, getUsersList])
 
     return (
         <LayoutPage>
@@ -143,7 +143,7 @@ const UserManagement = () => {
                                 ref={setStatus}
                             >
                                 <option value={''}>{'เลือกสถานะ'}</option>
-                                <option value={1}>{'ผู้ดูแลผู้สูงอายุ'}</option>
+                                <option value={1}>{'ผู้ดูแลผู้มีภาวะพึ่งพิง'}</option>
                                 <option value={2}>{'เจ้าหน้าที่ อบต.'}</option>
                             </Form.Select>
 
